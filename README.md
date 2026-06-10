@@ -1,73 +1,40 @@
-# React + TypeScript + Vite
+# WBL Operations ERP
+Whirlpool Bangladesh Warehouse Operations — React + Vite + Supabase + Vercel · PWA + Zebra TC57
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Modules
+| Module | What it does |
+|---|---|
+| Dashboard | Live stats + monthly charts |
+| Inbound | Receiving entry (all Excel columns) |
+| Outbound | Dispatch entry (all Excel columns) |
+| Physical Inventory | Barcode scan for Zebra TC57, session-based |
+| Stock Summary | Period stock report (mirrors Excel Summary sheet) |
+| Reports | Charts: trends, categories, top customers, transport costs |
+| SKU List | 69 products pre-loaded from Excel |
+| Customers | Customer master with codes |
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Step 1 — Supabase
+1. https://supabase.com → New project
+2. Settings → API → copy **Project URL** and **anon key**
+3. SQL Editor → paste `supabase/schema.sql` → Run
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Step 2 — Local Dev
+```
+cp .env.example .env.local
+# fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+npm install && npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Step 3 — Vercel Deploy
+1. vercel.com → Import from GitHub → `Foysalsdev/WBL-Operations`
+2. Add env vars: `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY`
+3. Deploy — auto-deploys on every push
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Step 4 — PWA Install (Mobile / Zebra TC57)
+- Chrome → Open deployed URL → Add to Home Screen
+- Zebra TC57: scanner trigger sends Enter key — Physical Inventory auto-submits
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Zebra TC57 Notes
+The scan input is: large font, auto-focus, submits on Enter, duplicate detection, location switching, session grouping.
