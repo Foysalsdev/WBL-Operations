@@ -226,3 +226,31 @@ INSERT INTO skus (sl, china_code, model_code, description, category) VALUES
 (68, 50052, 50094, 'MAGICOOK PRO 26CE Black', 'microwave_oven'),
 (69, NULL, 60025, '1.5T SUPREMECOOLPRO 3SCOPR INV (IDU)', 'air_conditioner')
 ON CONFLICT (model_code) DO NOTHING;
+
+-- =====================================================
+-- 7. SERIAL AUDIT LOG
+-- Tracks every edit/replace with reason
+-- =====================================================
+CREATE TABLE IF NOT EXISTS serial_audit_log (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  action TEXT NOT NULL CHECK (action IN ('edit_entry', 'replace_serial', 'add_serial', 'remove_serial')),
+  entry_type TEXT NOT NULL CHECK (entry_type IN ('inbound', 'outbound', 'inventory')),
+  entry_id UUID NOT NULL,
+  serial_old TEXT,
+  serial_new TEXT,
+  field_changed TEXT,
+  old_value TEXT,
+  new_value TEXT,
+  reason TEXT NOT NULL,
+  operator_name TEXT,
+  created_by TEXT DEFAULT 'system'
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_entry ON serial_audit_log(entry_id);
+CREATE INDEX IF NOT EXISTS idx_audit_serial_old ON serial_audit_log(serial_old);
+CREATE INDEX IF NOT EXISTS idx_audit_serial_new ON serial_audit_log(serial_new);
+CREATE INDEX IF NOT EXISTS idx_audit_action ON serial_audit_log(action);
+
+ALTER TABLE serial_audit_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all for authenticated" ON serial_audit_log FOR ALL USING (true);

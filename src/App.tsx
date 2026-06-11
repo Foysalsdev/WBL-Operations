@@ -10,6 +10,7 @@ import SKUPage from './pages/sku/SKUPage'
 import CustomersPage from './pages/customers/CustomersPage'
 import StockSummaryPage from './pages/reports/StockSummaryPage'
 import ReportsPage from './pages/reports/ReportsPage'
+import SerialSearchPage from './pages/serial/SerialSearchPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,10 +28,11 @@ export default function App() {
             <Route path="/inbound" element={<InboundPage />} />
             <Route path="/outbound" element={<OutboundPage />} />
             <Route path="/inventory" element={<PhysicalInventoryPage />} />
+            <Route path="/serial" element={<SerialSearchPage />} />
+            <Route path="/stock" element={<StockSummaryPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/sku" element={<SKUPage />} />
             <Route path="/customers" element={<CustomersPage />} />
-            <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/stock" element={<StockSummaryPage />} />
           </Routes>
         </Layout>
       </Router>
