@@ -1,228 +1,239 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import { StatCard, LoadingSpinner } from '../../components/ui'
-import {
-  PackageCheck, PackageMinus, ClipboardList, Boxes,
-  TrendingUp, TrendingDown, AlertCircle, Calendar
-} from 'lucide-react'
+import { StatCard, LoadingSpinner, PageHeader } from '../../components/ui'
 import { format } from 'date-fns'
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts'
 
 function useStats() {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const today = new Date()
-      const thisMonth = format(today, 'MMMM')
-
-      const [inboundAll, outboundAll, inventoryCount, inboundMonth, outboundMonth] = await Promise.all([
+      const thisMonth = format(new Date(), 'MMMM')
+      const [inAll, outAll, invCount, inMonth, outMonth] = await Promise.all([
         supabase.from('inbound_entries').select('refrigerator_qty,washing_machine_qty,microwave_oven_qty,air_conditioner_qty,transport_cost'),
         supabase.from('outbound_entries').select('refrigerator_qty,washing_machine_qty,microwave_oven_qty,transport_cost'),
         supabase.from('physical_inventory').select('id', { count: 'exact', head: true }),
-        supabase.from('inbound_entries').select('refrigerator_qty,washing_machine_qty,microwave_oven_qty').eq('month', thisMonth),
+        supabase.from('inbound_entries').select('refrigerator_qty,washing_machine_qty,microwave_oven_qty,air_conditioner_qty').eq('month', thisMonth),
         supabase.from('outbound_entries').select('refrigerator_qty,washing_machine_qty,microwave_oven_qty').eq('month', thisMonth),
       ])
-
-      const sumQty = (rows: any[]) =>
-        (rows || []).reduce((a: number, r: any) =>
-          a + (r.refrigerator_qty || 0) + (r.washing_machine_qty || 0) + (r.microwave_oven_qty || 0) + (r.air_conditioner_qty || 0), 0)
-
-      const sumCost = (rows: any[]) =>
-        (rows || []).reduce((a: number, r: any) => a + (r.transport_cost || 0), 0)
-
+      const sumQty = (rows: any[]) => (rows || []).reduce((a: number, r: any) =>
+        a + (r.refrigerator_qty||0) + (r.washing_machine_qty||0) + (r.microwave_oven_qty||0) + (r.air_conditioner_qty||0), 0)
+      const sumCost = (rows: any[]) => (rows || []).reduce((a: number, r: any) => a + (r.transport_cost||0), 0)
       return {
-        totalInbound: sumQty(inboundAll.data || []),
-        totalOutbound: sumQty(outboundAll.data || []),
-        totalInventoryScans: inventoryCount.count || 0,
-        monthInbound: sumQty(inboundMonth.data || []),
-        monthOutbound: sumQty(outboundMonth.data || []),
-        totalTransportCost: sumCost([...(inboundAll.data || []), ...(outboundAll.data || [])]),
+        totalInbound:  sumQty(inAll.data  || []),
+        totalOutbound: sumQty(outAll.data || []),
+        totalScans:    invCount.count || 0,
+        monthInbound:  sumQty(inMonth.data  || []),
+        monthOutbound: sumQty(outMonth.data || []),
+        totalCost: sumCost([...(inAll.data||[]), ...(outAll.data||[])]),
         thisMonth,
       }
     },
   })
 }
 
-function useMonthlyChart() {
+function useChart() {
   return useQuery({
     queryKey: ['monthly-chart'],
     queryFn: async () => {
-      const months = ['January','February','March','April','May','June',
-        'July','August','September','October','November','December']
-
-      const [inboundData, outboundData] = await Promise.all([
-        supabase.from('inbound_entries').select('month,refrigerator_qty,washing_machine_qty,microwave_oven_qty'),
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+      const [inD, outD] = await Promise.all([
+        supabase.from('inbound_entries').select('month,refrigerator_qty,washing_machine_qty,microwave_oven_qty,air_conditioner_qty'),
         supabase.from('outbound_entries').select('month,refrigerator_qty,washing_machine_qty,microwave_oven_qty'),
       ])
-
       const sumByMonth = (rows: any[]) => {
-        const map: Record<string, number> = {}
-        for (const r of rows || []) {
+        const m: Record<string, number> = {}
+        for (const r of rows||[]) {
           if (!r.month) continue
-          map[r.month] = (map[r.month] || 0) + (r.refrigerator_qty || 0) + (r.washing_machine_qty || 0) + (r.microwave_oven_qty || 0)
+          m[r.month] = (m[r.month]||0) + (r.refrigerator_qty||0)+(r.washing_machine_qty||0)+(r.microwave_oven_qty||0)+(r.air_conditioner_qty||0)
         }
-        return map
+        return m
       }
-
-      const inMap = sumByMonth(inboundData.data || [])
-      const outMap = sumByMonth(outboundData.data || [])
-
-      return months
-        .filter(m => inMap[m] || outMap[m])
-        .map(m => ({ month: m.slice(0, 3), Inbound: inMap[m] || 0, Outbound: outMap[m] || 0 }))
+      const inMap  = sumByMonth(inD.data  || [])
+      const outMap = sumByMonth(outD.data || [])
+      return months.filter(m => inMap[m] || outMap[m]).map(m => ({
+        month: m.slice(0,3), Inbound: inMap[m]||0, Outbound: outMap[m]||0
+      }))
     },
   })
 }
 
-function useRecentActivity() {
+function useRecent() {
   return useQuery({
     queryKey: ['recent-activity'],
     queryFn: async () => {
-      const [inbound, outbound] = await Promise.all([
-        supabase.from('inbound_entries').select('*').order('receiving_date', { ascending: false }).limit(5),
-        supabase.from('outbound_entries').select('*').order('dispatch_date', { ascending: false }).limit(5),
+      const [inD, outD] = await Promise.all([
+        supabase.from('inbound_entries').select('*').order('receiving_date', { ascending: false }).limit(6),
+        supabase.from('outbound_entries').select('*').order('dispatch_date', { ascending: false }).limit(6),
       ])
-      return {
-        inbound: inbound.data || [],
-        outbound: outbound.data || [],
-      }
+      return { inbound: inD.data||[], outbound: outD.data||[] }
     },
   })
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid rgba(55,53,47,0.12)',
+      borderRadius: 6, padding: '8px 12px', fontSize: 12,
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+    }}>
+      <p style={{ fontWeight: 600, marginBottom: 4, color: '#37352F' }}>{label}</p>
+      {payload.map((p: any) => (
+        <p key={p.name} style={{ color: p.color }}>
+          {p.name}: <strong>{p.value}</strong>
+        </p>
+      ))}
+    </div>
+  )
+}
+
 export default function Dashboard() {
-  const stats = useStats()
-  const chart = useMonthlyChart()
-  const recent = useRecentActivity()
+  const stats  = useStats()
+  const chart  = useChart()
+  const recent = useRecent()
 
   if (stats.isLoading) return <LoadingSpinner />
-
   const s = stats.data!
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Operations Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {format(new Date(), 'EEEE, dd MMMM yyyy')} · Madanpur Warehouse
-          </p>
-        </div>
-        <div className="hidden sm:flex items-center gap-2 text-sm text-slate-500 bg-white border border-slate-100 rounded-lg px-3 py-2">
-          <Calendar size={14} />
-          {s.thisMonth} Overview
-        </div>
+    <div>
+      <PageHeader
+        emoji="🏠"
+        title="Dashboard"
+        subtitle={`${format(new Date(), 'EEEE, d MMMM yyyy')} · Madanpur Warehouse`}
+      />
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <StatCard label="Total Inbound"   value={s.totalInbound.toLocaleString()}  sub={`+${s.monthInbound} this month`}    accent="#0F7B6C" />
+        <StatCard label="Total Outbound"  value={s.totalOutbound.toLocaleString()} sub={`+${s.monthOutbound} this month`}   accent="#E03E3E" />
+        <StatCard label="Inventory Scans" value={s.totalScans.toLocaleString()}    sub="Physical count records"             accent="#6940A5" />
+        <StatCard label="Transport Cost"  value={`৳${Math.round(s.totalCost/1000)}K`} sub="All-time total"                 accent="#DFAB01" />
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Inbound"
-          value={s.totalInbound.toLocaleString()}
-          sub={`${s.monthInbound} this month`}
-          icon={<PackageCheck size={22} />}
-          color="text-emerald-600"
-        />
-        <StatCard
-          label="Total Outbound"
-          value={s.totalOutbound.toLocaleString()}
-          sub={`${s.monthOutbound} this month`}
-          icon={<PackageMinus size={22} />}
-          color="text-red-500"
-        />
-        <StatCard
-          label="Inventory Scans"
-          value={s.totalInventoryScans.toLocaleString()}
-          sub="Physical count records"
-          icon={<ClipboardList size={22} />}
-          color="text-purple-600"
-        />
-        <StatCard
-          label="Transport Cost"
-          value={`৳${Math.round(s.totalTransportCost / 1000)}K`}
-          sub="All time total"
-          icon={<Boxes size={22} />}
-          color="text-amber-600"
-        />
-      </div>
+      {/* Chart + Recent side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
-      {/* Chart + Recent */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chart */}
-        <div className="lg:col-span-2 card p-5">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-semibold text-slate-900">Monthly Movement</h2>
-            <div className="flex items-center gap-4 text-xs text-slate-500">
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block"/>Inbound</span>
-              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-400 inline-block"/>Outbound</span>
-            </div>
+        <div className="lg:col-span-2">
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(55,53,47,0.55)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+            Monthly Movement
           </div>
-          {chart.isLoading ? (
-            <LoadingSpinner />
-          ) : chart.data?.length === 0 ? (
-            <div className="flex items-center justify-center h-48 text-slate-400 text-sm">
-              No data yet — add inbound/outbound entries to see trends.
+          {chart.isLoading ? <LoadingSpinner /> : !chart.data?.length ? (
+            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(55,53,47,0.3)', fontSize: 13, border: '1px dashed rgba(55,53,47,0.15)', borderRadius: 6 }}>
+              Add inbound/outbound entries to see trends
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={chart.data} barSize={18}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontSize: '12px' }}
-                />
-                <Bar dataKey="Inbound" fill="#10b981" radius={[3,3,0,0]} />
-                <Bar dataKey="Outbound" fill="#f87171" radius={[3,3,0,0]} />
+              <BarChart data={chart.data} barSize={14} barGap={3}>
+                <CartesianGrid strokeDasharray="4 4" stroke="rgba(55,53,47,0.06)" vertical={false} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'rgba(55,53,47,0.5)' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'rgba(55,53,47,0.5)' }} axisLine={false} tickLine={false} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(55,53,47,0.03)' }} />
+                <Bar dataKey="Inbound"  fill="#0F7B6C" radius={[2,2,0,0]} />
+                <Bar dataKey="Outbound" fill="#E03E3E" radius={[2,2,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
         </div>
 
-        {/* Quick summary */}
-        <div className="card p-5">
-          <h2 className="font-semibold text-slate-900 mb-4">This Month</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-slate-50">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <TrendingUp size={15} className="text-emerald-500" /> Inbound
-              </div>
-              <span className="font-semibold text-slate-900">{s.monthInbound}</span>
+        {/* This month summary */}
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(55,53,47,0.55)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+            {s.thisMonth} Summary
+          </div>
+          <div className="stat-block" style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+              <span style={{ fontSize: 13, color: 'rgba(55,53,47,0.7)' }}>Inbound</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: '#0F7B6C' }}>{s.monthInbound}</span>
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-slate-50">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <TrendingDown size={15} className="text-red-400" /> Outbound
-              </div>
-              <span className="font-semibold text-slate-900">{s.monthOutbound}</span>
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(55,53,47,0.06)', margin: '4px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+              <span style={{ fontSize: 13, color: 'rgba(55,53,47,0.7)' }}>Outbound</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: '#E03E3E' }}>{s.monthOutbound}</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <AlertCircle size={15} className="text-amber-500" /> Net Movement
-              </div>
-              <span className={`font-semibold ${s.monthInbound - s.monthOutbound >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+            <hr style={{ border: 'none', borderTop: '1px solid rgba(55,53,47,0.06)', margin: '4px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0' }}>
+              <span style={{ fontSize: 13, color: 'rgba(55,53,47,0.7)' }}>Net</span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: s.monthInbound - s.monthOutbound >= 0 ? '#0F7B6C' : '#E03E3E' }}>
                 {s.monthInbound - s.monthOutbound >= 0 ? '+' : ''}{s.monthInbound - s.monthOutbound}
               </span>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Recent inbound */}
-          <h3 className="font-medium text-slate-700 mt-6 mb-3 text-sm">Recent Inbound</h3>
-          <div className="space-y-2">
-            {recent.data?.inbound.slice(0, 3).map((r: any) => (
-              <div key={r.id} className="flex items-center justify-between text-xs">
-                <div>
-                  <p className="text-slate-700 font-medium truncate max-w-[130px]">{r.party_name}</p>
-                  <p className="text-slate-400">{r.receiving_date}</p>
-                </div>
-                <span className="text-emerald-600 font-semibold">
-                  +{(r.refrigerator_qty||0)+(r.washing_machine_qty||0)+(r.microwave_oven_qty||0)+(r.air_conditioner_qty||0)}
-                </span>
-              </div>
-            ))}
+      {/* Recent tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Inbound */}
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(55,53,47,0.55)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+            Recent Inbound
+          </div>
+          <div className="card overflow-hidden">
+            <table className="notion-table">
+              <thead>
+                <tr>
+                  <th>Party</th>
+                  <th>Date</th>
+                  <th style={{ textAlign: 'right' }}>Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.data?.inbound.length === 0 && (
+                  <tr><td colSpan={3} style={{ textAlign: 'center', color: 'rgba(55,53,47,0.35)', padding: '20px 12px', fontSize: 13 }}>No entries yet</td></tr>
+                )}
+                {recent.data?.inbound.map((r: any) => (
+                  <tr key={r.id}>
+                    <td style={{ maxWidth: 140 }}>
+                      <span style={{ fontSize: 13, fontWeight: 500 }} className="truncate block">{r.party_name}</span>
+                    </td>
+                    <td style={{ fontSize: 12, color: 'rgba(55,53,47,0.55)', whiteSpace: 'nowrap' }}>{r.receiving_date}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600, color: '#0F7B6C', fontSize: 13 }}>
+                      +{(r.refrigerator_qty||0)+(r.washing_machine_qty||0)+(r.microwave_oven_qty||0)+(r.air_conditioner_qty||0)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Recent Outbound */}
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(55,53,47,0.55)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+            Recent Outbound
+          </div>
+          <div className="card overflow-hidden">
+            <table className="notion-table">
+              <thead>
+                <tr>
+                  <th>Party</th>
+                  <th>Date</th>
+                  <th style={{ textAlign: 'right' }}>Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.data?.outbound.length === 0 && (
+                  <tr><td colSpan={3} style={{ textAlign: 'center', color: 'rgba(55,53,47,0.35)', padding: '20px 12px', fontSize: 13 }}>No entries yet</td></tr>
+                )}
+                {recent.data?.outbound.map((r: any) => (
+                  <tr key={r.id}>
+                    <td style={{ maxWidth: 140 }}>
+                      <span style={{ fontSize: 13, fontWeight: 500 }} className="truncate block">{r.party_name}</span>
+                    </td>
+                    <td style={{ fontSize: 12, color: 'rgba(55,53,47,0.55)', whiteSpace: 'nowrap' }}>{r.dispatch_date}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 600, color: '#E03E3E', fontSize: 13 }}>
+                      −{(r.refrigerator_qty||0)+(r.washing_machine_qty||0)+(r.microwave_oven_qty||0)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

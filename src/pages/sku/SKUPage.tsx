@@ -1,200 +1,126 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import { Modal, LoadingSpinner, FormField, SearchInput, EmptyState, CategoryBadge } from '../../components/ui'
-import { Database, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Modal, LoadingSpinner, FormField, EmptyState, CategoryTag, PageHeader, RowActions } from '../../components/ui'
+import { Plus, Pencil, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-interface SKUFormData {
-  sl: number
-  china_code?: string
-  model_code: number
-  description: string
-  category: 'refrigerator' | 'washing_machine' | 'microwave_oven' | 'air_conditioner'
-}
-
+interface SKURow { id: string; sl: number; china_code?: string; model_code: number; description: string; category: string }
 const CATEGORIES = [
-  { value: 'refrigerator', label: 'Refrigerator' },
+  { value: 'refrigerator',    label: 'Refrigerator'    },
   { value: 'washing_machine', label: 'Washing Machine' },
-  { value: 'microwave_oven', label: 'Microwave Oven' },
+  { value: 'microwave_oven',  label: 'Microwave Oven'  },
   { value: 'air_conditioner', label: 'Air Conditioner' },
 ]
-
-function useSKUs(search: string, category: string) {
-  return useQuery({
-    queryKey: ['skus', search, category],
-    queryFn: async () => {
-      let q = supabase.from('skus').select('*').order('sl')
-      if (search) q = q.ilike('description', `%${search}%`)
-      if (category) q = q.eq('category', category)
-      const { data } = await q
-      return (data || []) as Array<SKUFormData & { id: string; created_at: string }>
-    },
-  })
-}
-
-const emptyForm: SKUFormData = { sl: 1, china_code: '', model_code: 0, description: '', category: 'refrigerator' }
+const emptyForm = () => ({ sl: 1, china_code: '', model_code: 0, description: '', category: 'refrigerator' })
 
 export default function SKUPage() {
   const qc = useQueryClient()
-  const [modalOpen, setModalOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<any>(null)
   const [search, setSearch] = useState('')
   const [catFilter, setCatFilter] = useState('')
-  const [form, setForm] = useState<SKUFormData>(emptyForm)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const { data: skus, isLoading } = useSKUs(search, catFilter)
+  const [form, setForm] = useState(emptyForm())
 
-  const openNew = () => {
-    setEditing(null)
-    setForm({ ...emptyForm, sl: (skus?.length || 0) + 1 })
-    setErrors({})
-    setModalOpen(true)
-  }
-  const openEdit = (row: any) => {
-    setEditing(row)
-    setForm({ sl: row.sl, china_code: row.china_code || '', model_code: row.model_code, description: row.description, category: row.category })
-    setErrors({})
-    setModalOpen(true)
-  }
+  const { data: skus, isLoading } = useQuery({
+    queryKey: ['skus', search, catFilter],
+    queryFn: async () => {
+      let q = supabase.from('skus').select('*').order('sl')
+      if (search) q = q.ilike('description', `%${search}%`)
+      if (catFilter) q = q.eq('category', catFilter)
+      const { data } = await q; return (data||[]) as SKURow[]
+    },
+  })
 
-  const validate = () => {
-    const e: Record<string, string> = {}
-    if (!form.sl || form.sl < 1) e.sl = 'Required'
-    if (!form.model_code || form.model_code < 1) e.model_code = 'Required'
-    if (!form.description.trim()) e.description = 'Required'
-    setErrors(e)
-    return Object.keys(e).length === 0
-  }
+  const counts: Record<string,number> = {}
+  for (const s of skus||[]) counts[s.category] = (counts[s.category]||0)+1
+
+  const openNew = () => { setEditing(null); setForm({ ...emptyForm(), sl: (skus?.length||0)+1 }); setOpen(true) }
+  const openEdit = (r: SKURow) => { setEditing(r); setForm({ sl: r.sl, china_code: r.china_code||'', model_code: r.model_code, description: r.description, category: r.category }); setOpen(true) }
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { sl: form.sl, china_code: form.china_code || null, model_code: form.model_code, description: form.description, category: form.category }
-      if (editing) {
-        const { error } = await supabase.from('skus').update(payload).eq('id', editing.id)
-        if (error) throw error
-      } else {
-        const { error } = await supabase.from('skus').insert(payload)
-        if (error) throw error
-      }
+      const p = { sl: form.sl, china_code: form.china_code||null, model_code: form.model_code, description: form.description, category: form.category }
+      if (editing) { const { error } = await supabase.from('skus').update(p).eq('id', editing.id); if (error) throw error }
+      else { const { error } = await supabase.from('skus').insert(p as any); if (error) throw error }
     },
-    onSuccess: () => {
-      toast.success(editing ? 'SKU updated' : 'SKU added')
-      qc.invalidateQueries({ queryKey: ['skus'] })
-      setModalOpen(false)
-    },
+    onSuccess: () => { toast.success(editing ? 'SKU updated' : 'SKU added'); qc.invalidateQueries({ queryKey: ['skus'] }); setOpen(false) },
     onError: (e: any) => toast.error(e.message),
   })
 
   const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('skus').delete().eq('id', id)
-      if (error) throw error
-    },
+    mutationFn: async (id: string) => { const { error } = await supabase.from('skus').delete().eq('id', id); if (error) throw error },
     onSuccess: () => { toast.success('SKU deleted'); qc.invalidateQueries({ queryKey: ['skus'] }) },
     onError: (e: any) => toast.error(e.message),
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (validate()) save.mutate()
-  }
-
-  const counts: Record<string, number> = {}
-  for (const s of skus || []) counts[s.category] = (counts[s.category] || 0) + 1
-
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap gap-3 items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Database size={20} className="text-brand-500" /> SKU List
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">{skus?.length || 0} products</p>
+    <div>
+      <PageHeader emoji="🗄️" title="SKU List" subtitle={`${skus?.length||0} products`} actions={<button onClick={openNew} className="btn-primary"><Plus size={13}/>Add SKU</button>} />
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search description…" style={{ width: 220 }} />
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[{ value: '', label: 'All' }, ...CATEGORIES].map(c => (
+            <button key={c.value} onClick={() => setCatFilter(c.value)}
+              style={{
+                padding: '3px 10px', borderRadius: 4, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: 'none',
+                background: catFilter===c.value ? '#37352F' : 'rgba(55,53,47,0.06)',
+                color: catFilter===c.value ? '#fff' : 'rgba(55,53,47,0.65)',
+              }}>
+              {c.label}
+              {c.value && <span style={{ marginLeft: 4, opacity: 0.6 }}>{counts[c.value]||0}</span>}
+            </button>
+          ))}
         </div>
-        <button onClick={openNew} className="btn-primary"><Plus size={15}/>Add SKU</button>
-      </div>
-
-      {/* Category filter pills */}
-      <div className="flex flex-wrap gap-2">
-        {[{ value: '', label: 'All', count: skus?.length || 0 }, ...CATEGORIES.map(c => ({ ...c, count: counts[c.value] || 0 }))].map(c => (
-          <button
-            key={c.value}
-            onClick={() => setCatFilter(c.value)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-              catFilter === c.value ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-slate-600 border-slate-200 hover:border-brand-300'
-            }`}
-          >
-            {c.label} <span className="ml-1 opacity-60">{c.count}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="card p-3">
-        <SearchInput value={search} onChange={setSearch} placeholder="Search description or code…" />
       </div>
 
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          {isLoading ? <LoadingSpinner /> : !skus?.length ? (
-            <EmptyState message="No SKUs found." icon={<Database size={40}/>}/>
-          ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  {['SL','Model Code','China Code','Description','Category',''].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
-                  ))}
+        {isLoading ? <LoadingSpinner /> : !skus?.length ? <EmptyState message="No SKUs found." /> : (
+          <table className="notion-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Model Code</th><th>China Code</th><th>Description</th><th>Category</th><th style={{ width: 60 }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {skus.map(row => (
+                <tr key={row.id} className="group">
+                  <td style={{ fontSize: 11, color: 'rgba(55,53,47,0.35)', fontFamily: 'monospace' }}>{row.sl}</td>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>{row.model_code}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(55,53,47,0.5)' }}>{row.china_code||'—'}</td>
+                  <td style={{ fontSize: 13, maxWidth: 300 }}>{row.description}</td>
+                  <td><CategoryTag category={row.category} /></td>
+                  <td>
+                    <RowActions>
+                      <button onClick={() => openEdit(row)} className="btn-ghost"><Pencil size={12}/></button>
+                      <button onClick={() => { if(confirm('Delete?')) del.mutate(row.id) }} className="btn-ghost" style={{ color: '#E03E3E' }}><Trash2 size={12}/></button>
+                    </RowActions>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {skus?.map((row) => (
-                  <tr key={row.id} className="table-row">
-                    <td className="px-4 py-3 text-slate-400 font-mono text-xs">{row.sl}</td>
-                    <td className="px-4 py-3 font-mono font-semibold text-slate-800">{row.model_code}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500">{row.china_code || '—'}</td>
-                    <td className="px-4 py-3 text-slate-700 max-w-xs truncate">{row.description}</td>
-                    <td className="px-4 py-3"><CategoryBadge category={row.category}/></td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1 justify-end">
-                        <button onClick={() => openEdit(row)} className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 rounded"><Pencil size={13}/></button>
-                        <button onClick={() => { if(confirm('Delete SKU?')) del.mutate(row.id) }} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded"><Trash2 size={13}/></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Edit SKU' : 'Add SKU'} size="md">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="SL No." required error={errors.sl}>
-              <input type="number" value={form.sl} onChange={e => setForm(f => ({...f, sl: Number(e.target.value)}))} className="w-full" />
-            </FormField>
-            <FormField label="Model Code" required error={errors.model_code}>
-              <input type="number" value={form.model_code || ''} onChange={e => setForm(f => ({...f, model_code: Number(e.target.value)}))} className="w-full" placeholder="e.g. 25001" />
-            </FormField>
+      <Modal open={open} onClose={() => setOpen(false)} title={editing ? 'Edit SKU' : 'Add SKU'}>
+        <form onSubmit={e => { e.preventDefault(); save.mutate() }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <FormField label="SL No." required><input type="number" value={form.sl} onChange={e => setForm(p => ({...p, sl: Number(e.target.value)}))} /></FormField>
+            <FormField label="Model Code" required><input type="number" value={form.model_code||''} onChange={e => setForm(p => ({...p, model_code: Number(e.target.value)}))} placeholder="e.g. 25001" /></FormField>
           </div>
-          <FormField label="China Code">
-            <input value={form.china_code || ''} onChange={e => setForm(f => ({...f, china_code: e.target.value}))} className="w-full" placeholder="Optional" />
-          </FormField>
-          <FormField label="Description" required error={errors.description}>
-            <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} className="w-full" placeholder="Full product description" />
-          </FormField>
+          <FormField label="China Code"><input value={form.china_code} onChange={e => setForm(p => ({...p, china_code: e.target.value}))} placeholder="Optional" /></FormField>
+          <FormField label="Description" required><input value={form.description} onChange={e => setForm(p => ({...p, description: e.target.value}))} /></FormField>
           <FormField label="Category" required>
-            <select value={form.category} onChange={e => setForm(f => ({...f, category: e.target.value as SKUFormData['category']}))} className="w-full">
+            <select value={form.category} onChange={e => setForm(p => ({...p, category: e.target.value}))}>
               {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
           </FormField>
-          <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
-            <button type="button" onClick={() => setModalOpen(false)} className="btn-secondary">Cancel</button>
-            <button type="submit" disabled={save.isPending} className="btn-primary">
-              {save.isPending ? 'Saving…' : editing ? 'Update' : 'Add SKU'}
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 12, borderTop: '1px solid rgba(55,53,47,0.09)' }}>
+            <button type="button" onClick={() => setOpen(false)} className="btn-secondary">Cancel</button>
+            <button type="submit" disabled={save.isPending} className="btn-primary">{save.isPending ? 'Saving…' : editing ? 'Save Changes' : 'Add SKU'}</button>
           </div>
         </form>
       </Modal>
