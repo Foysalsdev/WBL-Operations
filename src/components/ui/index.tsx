@@ -28,12 +28,15 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   )
 }
 
-// ── Page Header (Notion style) — text only, no emoji ──
+// ── Page Header (Notion style) — large page icon + title ──
 export function PageHeader({
-  title, subtitle, actions
-}: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+  icon, title, subtitle, actions
+}: { icon?: string; title: string; subtitle?: string; actions?: React.ReactNode }) {
   return (
     <div className="mb-8">
+      {icon && (
+        <div style={{ fontSize: 44, lineHeight: 1, marginBottom: 12 }}>{icon}</div>
+      )}
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="page-title">{title}</h1>

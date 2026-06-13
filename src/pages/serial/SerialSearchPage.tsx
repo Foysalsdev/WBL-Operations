@@ -332,7 +332,7 @@ export default function SerialSearchPage() {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      <PageHeader title="Serial Search" subtitle="Scan or type any serial — status, history, edit, replace, print" />
+      <PageHeader icon="🔍" title="Serial Search" subtitle="Scan or type any serial — status, history, edit, replace, print" />
 
       {/* Search bar */}
       <div className="card" style={{ padding:14, marginBottom:20 }}>

@@ -97,6 +97,7 @@ export default function InboundPage() {
   return (
     <div>
       <PageHeader
+        icon="📥"
         title="Inbound"
         subtitle={`${entries?.length||0} receiving records`}
         actions={

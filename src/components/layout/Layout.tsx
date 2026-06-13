@@ -1,24 +1,88 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { Menu, X, ChevronRight } from 'lucide-react'
+import { Menu, X, ChevronRight, ChevronDown, Plus, MoreHorizontal, Search } from 'lucide-react'
 
 const NAV_OPERATIONS = [
-  { to: '/',          label: 'Dashboard' },
-  { to: '/serial',    label: 'Serial Search' },
-  { to: '/inbound',   label: 'Inbound' },
-  { to: '/outbound',  label: 'Outbound' },
-  { to: '/inventory', label: 'Physical Inventory' },
-  { to: '/stock',     label: 'Stock Summary' },
-  { to: '/reports',   label: 'Reports' },
+  { to: '/',          label: 'Dashboard',         icon: '🏠' },
+  { to: '/serial',    label: 'Serial Search',      icon: '🔍' },
+  { to: '/inbound',   label: 'Inbound',            icon: '📥' },
+  { to: '/outbound',  label: 'Outbound',           icon: '📤' },
+  { to: '/inventory', label: 'Physical Inventory', icon: '📋' },
+  { to: '/stock',     label: 'Stock Summary',      icon: '📦' },
+  { to: '/reports',   label: 'Reports',            icon: '📊' },
 ]
 const NAV_MASTER = [
-  { to: '/sku',       label: 'SKU List' },
-  { to: '/customers', label: 'Customers' },
+  { to: '/sku',       label: 'SKU List',  icon: '🗄️' },
+  { to: '/customers', label: 'Customers', icon: '👥' },
 ]
 const ALL = [...NAV_OPERATIONS, ...NAV_MASTER]
 
+function SidebarSection({
+  title, items, open, onToggle, onNavigate
+}: {
+  title: string
+  items: { to: string; label: string; icon: string }[]
+  open: boolean
+  onToggle: () => void
+  onNavigate: () => void
+}) {
+  return (
+    <div className="mb-0.5">
+      {/* Section header — collapsible, hover reveals + button */}
+      <div
+        className="group flex items-center gap-1 px-2 py-1 rounded cursor-pointer hover:bg-black/5"
+        onClick={onToggle}
+        style={{ userSelect: 'none' }}
+      >
+        <span style={{ width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(55,53,47,0.45)' }}>
+          {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        </span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(55,53,47,0.45)', letterSpacing: '0.04em', textTransform: 'uppercase', flex: 1 }}>
+          {title}
+        </span>
+        <button
+          onClick={(e) => { e.stopPropagation() }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.45)', borderRadius: 3 }}
+          title="Add page"
+        >
+          <Plus size={13} />
+        </button>
+      </div>
+
+      {/* Items */}
+      {open && items.map(({ to, label, icon }) => (
+        <NavLink
+          key={to}
+          to={to}
+          end={to === '/'}
+          onClick={onNavigate}
+          className={({ isActive }) => `
+            group flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors
+            ${isActive ? 'bg-gray-200/80 text-gray-900 font-medium' : 'text-gray-700 hover:bg-gray-100'}
+          `}
+          style={{ marginLeft: 4 }}
+        >
+          <span style={{ fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0, lineHeight: 1 }}>{icon}</span>
+          <span className="truncate" style={{ flex: 1, fontSize: 14 }}>{label}</span>
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.4)', borderRadius: 3, flexShrink: 0 }}
+            title="More"
+          >
+            <MoreHorizontal size={13} />
+          </button>
+        </NavLink>
+      ))}
+    </div>
+  )
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [opsOpen, setOpsOpen] = useState(true)
+  const [masterOpen, setMasterOpen] = useState(true)
   const location = useLocation()
   const current = ALL.find(n => n.to === location.pathname)
 
@@ -48,60 +112,42 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       >
         {/* Workspace header */}
         <div className="flex items-center gap-2 px-3 py-3" style={{ minHeight: 48 }}>
-          <div className="flex items-center gap-2 flex-1 min-w-0 px-1 py-1 rounded cursor-pointer hover:bg-black/5 transition-colors">
-            <div className="w-5 h-5 rounded-sm bg-gray-400 flex-shrink-0" />
+          <div className="flex items-center gap-2 flex-1 min-w-0 px-1.5 py-1 rounded cursor-pointer hover:bg-black/5 transition-colors">
+            <div style={{
+              width: 20, height: 20, borderRadius: 4, background: '#37352F',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
+            }}>W</div>
             <span className="text-sm font-semibold text-gray-800 truncate">WBL Operations</span>
-            <ChevronRight size={12} className="flex-shrink-0 ml-auto" style={{ color: 'rgba(55,53,47,0.45)' }} />
+            <ChevronDown size={13} className="flex-shrink-0 ml-auto" style={{ color: 'rgba(55,53,47,0.45)' }} />
+          </div>
+        </div>
+
+        {/* Search row */}
+        <div className="px-3 mb-1">
+          <div className="flex items-center gap-2 px-2 py-1 rounded text-sm text-gray-500 hover:bg-black/5 cursor-pointer transition-colors">
+            <Search size={13} style={{ color: 'rgba(55,53,47,0.45)' }} />
+            <span style={{ fontSize: 13 }}>Search</span>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-2 py-1">
-
-          {/* Operations */}
-          <div className="mb-1">
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(55,53,47,0.45)', letterSpacing: '0.04em', textTransform: 'uppercase', padding: '8px 8px' }}>
-              Operations
-            </div>
-            {NAV_OPERATIONS.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                end={to === '/'}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) => `
-                  flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors
-                  ${isActive 
-                    ? 'bg-gray-200 text-gray-900 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-100'
-                  }
-                `}
-              >
-                <span>{label}</span>
-              </NavLink>
-            ))}
-          </div>
-
-          <div className="mt-3">
-            <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(55,53,47,0.45)', letterSpacing: '0.04em', textTransform: 'uppercase', padding: '8px 8px' }}>
-              Master Data
-            </div>
-            {NAV_MASTER.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) => `
-                  flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors
-                  ${isActive 
-                    ? 'bg-gray-200 text-gray-900 font-medium' 
-                    : 'text-gray-600 hover:bg-gray-100'
-                  }
-                `}
-              >
-                <span>{label}</span>
-              </NavLink>
-            ))}
+          <SidebarSection
+            title="Operations"
+            items={NAV_OPERATIONS}
+            open={opsOpen}
+            onToggle={() => setOpsOpen(o => !o)}
+            onNavigate={() => setMobileOpen(false)}
+          />
+          <div className="mt-2">
+            <SidebarSection
+              title="Master Data"
+              items={NAV_MASTER}
+              open={masterOpen}
+              onToggle={() => setMasterOpen(o => !o)}
+              onNavigate={() => setMobileOpen(false)}
+            />
           </div>
         </nav>
 
@@ -139,10 +185,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {mobileOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
 
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1" style={{ fontSize: 13, color: 'rgba(55,53,47,0.55)' }}>
-            <span>WBL</span>
+          {/* Breadcrumb with page icon */}
+          <div className="flex items-center gap-1.5" style={{ fontSize: 13, color: 'rgba(55,53,47,0.55)' }}>
+            <span>WBL Operations</span>
             <ChevronRight size={12} style={{ color: 'rgba(55,53,47,0.30)' }} />
+            <span style={{ fontSize: 14 }}>{current?.icon ?? '🏠'}</span>
             <span style={{ color: '#37352F', fontWeight: 500 }}>
               {current?.label ?? 'Dashboard'}
             </span>

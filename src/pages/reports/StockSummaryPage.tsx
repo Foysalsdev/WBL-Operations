@@ -62,7 +62,7 @@ export default function StockSummaryPage() {
 
   return (
     <div>
-      <PageHeader title="Stock Summary" subtitle={`${period} · ${stock?.length||0} SKUs`}
+      <PageHeader icon="📦" title="Stock Summary" subtitle={`${period} · ${stock?.length||0} SKUs`}
         actions={<><button onClick={exportCSV} className="btn-secondary"><Download size={13}/>Export</button><button onClick={openNew} className="btn-primary"><Plus size={13}/>Add Record</button></>}
       />
 

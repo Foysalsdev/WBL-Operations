@@ -71,6 +71,7 @@ export default function PhysicalInventoryPage() {
   return (
     <div>
       <PageHeader
+        icon="📋"
         title="Physical Inventory"
         subtitle={`Session: ${sessionId}`}
         actions={
