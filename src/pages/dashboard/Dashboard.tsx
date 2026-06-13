@@ -102,7 +102,6 @@ export default function Dashboard() {
   return (
     <div>
       <PageHeader
-        emoji="🏠"
         title="Dashboard"
         subtitle={`${format(new Date(), 'EEEE, d MMMM yyyy')} · Madanpur Warehouse`}
       />

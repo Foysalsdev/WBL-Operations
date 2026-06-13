@@ -56,7 +56,7 @@ export default function SKUPage() {
 
   return (
     <div>
-      <PageHeader emoji="🗄️" title="SKU List" subtitle={`${skus?.length||0} products`} actions={<button onClick={openNew} className="btn-primary"><Plus size={13}/>Add SKU</button>} />
+      <PageHeader title="SKU List" subtitle={`${skus?.length||0} products`} actions={<button onClick={openNew} className="btn-primary"><Plus size={13}/>Add SKU</button>} />
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>

@@ -71,7 +71,6 @@ export default function PhysicalInventoryPage() {
   return (
     <div>
       <PageHeader
-        emoji="📋"
         title="Physical Inventory"
         subtitle={`Session: ${sessionId}`}
         actions={

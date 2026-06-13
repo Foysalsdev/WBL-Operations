@@ -97,7 +97,6 @@ export default function InboundPage() {
   return (
     <div>
       <PageHeader
-        emoji="📥"
         title="Inbound"
         subtitle={`${entries?.length||0} receiving records`}
         actions={

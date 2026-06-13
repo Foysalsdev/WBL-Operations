@@ -97,7 +97,6 @@ export default function OutboundPage() {
   return (
     <div>
       <PageHeader
-        emoji="📤"
         title="Outbound"
         subtitle={`${entries?.length||0} dispatch records`}
         actions={

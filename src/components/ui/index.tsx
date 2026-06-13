@@ -14,22 +14,12 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0"
-        style={{ background: 'rgba(15,15,15,0.6)' }}
-        onClick={onClose}
-      />
-      <div
-        className="notion-modal relative flex flex-col"
-        style={{ width: '100%', maxWidth: sizeMap[size], maxHeight: '90vh' }}
-      >
+      <div className="absolute inset-0" style={{ background: 'rgba(15,15,15,0.6)' }} onClick={onClose} />
+      <div className="notion-modal relative flex flex-col" style={{ width: '100%', maxWidth: sizeMap[size], maxHeight: '90vh' }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgba(55,53,47,0.09)', flexShrink: 0 }}>
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(55,53,47,0.09)', flexShrink: 0 }}>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: '#37352F' }}>{title}</h2>
-          <button onClick={onClose} className="btn-ghost" style={{ padding: '3px 5px' }}>
-            <X size={15} />
-          </button>
+          <button onClick={onClose} className="btn-ghost" style={{ padding: '3px 5px' }}><X size={15} /></button>
         </div>
         {/* Body */}
         <div className="overflow-y-auto flex-1 p-5">{children}</div>
@@ -38,13 +28,12 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   )
 }
 
-// ── Page Header (Notion style) ───────────────────────
+// ── Page Header (Notion style) — text only, no emoji ──
 export function PageHeader({
-  emoji, title, subtitle, actions
-}: { emoji: string; title: string; subtitle?: string; actions?: React.ReactNode }) {
+  title, subtitle, actions
+}: { title: string; subtitle?: string; actions?: React.ReactNode }) {
   return (
     <div className="mb-8">
-      <div style={{ fontSize: 36, lineHeight: 1, marginBottom: 8 }}>{emoji}</div>
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="page-title">{title}</h1>
