@@ -72,7 +72,7 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <PageHeader icon="📊" title="Reports & Analytics" subtitle="All-time summary · Madanpur Warehouse" />
+      <PageHeader icon="bar_chart" title="Reports & Analytics" subtitle="All-time summary · Madanpur Warehouse" />
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:10, marginBottom:32 }} className="lg:grid-cols-4">
         <StatCard label="Total Inbound"  value={data.totalInboundQty.toLocaleString()}  accent="#0F7B6C" />

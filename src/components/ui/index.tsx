@@ -1,5 +1,17 @@
 import { X } from 'lucide-react'
 
+// ── Icon (Google Material Symbols Outlined — monochrome) ──
+export function Icon({ name, size = 18, className = '', style }: { name: string; size?: number; className?: string; style?: React.CSSProperties }) {
+  return (
+    <span
+      className={`msi ${className}`}
+      style={{ fontSize: size, ...style }}
+    >
+      {name}
+    </span>
+  )
+}
+
 // ── Modal ────────────────────────────────────────────
 interface ModalProps {
   open: boolean
@@ -28,14 +40,16 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
   )
 }
 
-// ── Page Header (Notion style) — large page icon + title ──
+// ── Page Header (Notion-style page icon + title) ──
 export function PageHeader({
   icon, title, subtitle, actions
 }: { icon?: string; title: string; subtitle?: string; actions?: React.ReactNode }) {
   return (
     <div className="mb-8">
       {icon && (
-        <div style={{ fontSize: 44, lineHeight: 1, marginBottom: 12 }}>{icon}</div>
+        <div style={{ marginBottom: 12 }}>
+          <Icon name={icon} size={40} style={{ color: 'rgba(55,53,47,0.85)' }} />
+        </div>
       )}
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>

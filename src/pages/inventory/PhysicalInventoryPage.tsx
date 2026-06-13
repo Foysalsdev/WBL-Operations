@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import { ScannerInput, LoadingSpinner, EmptyState, Modal, FormField, PageHeader } from '../../components/ui'
+import { ScannerInput, LoadingSpinner, EmptyState, Modal, FormField, PageHeader, Icon } from '../../components/ui'
 import { Trash2, Download, RefreshCw, CheckCircle2, AlertCircle, MapPin } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -71,7 +71,7 @@ export default function PhysicalInventoryPage() {
   return (
     <div>
       <PageHeader
-        icon="📋"
+        icon="inventory_2"
         title="Physical Inventory"
         subtitle={`Session: ${sessionId}`}
         actions={
@@ -86,7 +86,7 @@ export default function PhysicalInventoryPage() {
       <Modal open={setupOpen} onClose={() => {}} title="Start Scanning Session">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ background: '#E7F3FB', border: '1px solid rgba(35,131,226,0.2)', borderRadius: 6, padding: '12px 14px', fontSize: 13, color: '#1a5f8f' }}>
-            <strong>📡 Zebra TC57 ready</strong> — scanner trigger fires Enter automatically.
+            <strong><Icon name="podcasts" size={14} style={{ verticalAlign: -2, marginRight: 4 }} />Zebra TC57 ready</strong> — scanner trigger fires Enter automatically.
           </div>
           <FormField label="Operator Name" required>
             <input value={scannerName} onChange={e => setScannerName(e.target.value)} placeholder="e.g. Hridoy" autoFocus />

@@ -97,7 +97,7 @@ export default function InboundPage() {
   return (
     <div>
       <PageHeader
-        icon="📥"
+        icon="call_received"
         title="Inbound"
         subtitle={`${entries?.length||0} receiving records`}
         actions={
@@ -131,9 +131,9 @@ export default function InboundPage() {
                   <th>SAP Invoice</th>
                   <th>Party</th>
                   <th>Route</th>
-                  <th style={{ textAlign: 'right' }}>🔵 Fridge</th>
-                  <th style={{ textAlign: 'right' }}>🟣 WM</th>
-                  <th style={{ textAlign: 'right' }}>🟡 MWO</th>
+                  <th style={{ textAlign: 'right' }}>Fridge</th>
+                  <th style={{ textAlign: 'right' }}>WM</th>
+                  <th style={{ textAlign: 'right' }}>MWO</th>
                   <th style={{ textAlign: 'right' }}>Total</th>
                   <th>Vehicle</th>
                   <th style={{ textAlign: 'right' }}>Cost</th>
@@ -237,16 +237,16 @@ export default function InboundPage() {
               Quantities Received
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-              <FormField label="🔵 Refrigerator">
+              <FormField label="Refrigerator">
                 <input type="number" min={0} value={form.refrigerator_qty} onChange={set('refrigerator_qty')} />
               </FormField>
-              <FormField label="🟣 Washing Machine">
+              <FormField label="Washing Machine">
                 <input type="number" min={0} value={form.washing_machine_qty} onChange={set('washing_machine_qty')} />
               </FormField>
-              <FormField label="🟡 Microwave Oven">
+              <FormField label="Microwave Oven">
                 <input type="number" min={0} value={form.microwave_oven_qty} onChange={set('microwave_oven_qty')} />
               </FormField>
-              <FormField label="🟢 Air Conditioner">
+              <FormField label="Air Conditioner">
                 <input type="number" min={0} value={form.air_conditioner_qty} onChange={set('air_conditioner_qty')} />
               </FormField>
             </div>

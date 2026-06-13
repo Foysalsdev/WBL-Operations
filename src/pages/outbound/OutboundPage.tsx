@@ -97,7 +97,7 @@ export default function OutboundPage() {
   return (
     <div>
       <PageHeader
-        icon="📤"
+        icon="call_made"
         title="Outbound"
         subtitle={`${entries?.length||0} dispatch records`}
         actions={
@@ -125,9 +125,9 @@ export default function OutboundPage() {
                   <th>SAP Invoice</th>
                   <th>Party</th>
                   <th>Route</th>
-                  <th style={{ textAlign: 'right' }}>🔵 Fridge</th>
-                  <th style={{ textAlign: 'right' }}>🟣 WM</th>
-                  <th style={{ textAlign: 'right' }}>🟡 MWO</th>
+                  <th style={{ textAlign: 'right' }}>Fridge</th>
+                  <th style={{ textAlign: 'right' }}>WM</th>
+                  <th style={{ textAlign: 'right' }}>MWO</th>
                   <th style={{ textAlign: 'right' }}>Total</th>
                   <th>Vehicle</th>
                   <th style={{ textAlign: 'right' }}>Cost</th>
@@ -187,9 +187,9 @@ export default function OutboundPage() {
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(55,53,47,0.09)' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(55,53,47,0.45)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Quantities Dispatched</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-              <FormField label="🔵 Refrigerator"><input type="number" min={0} value={form.refrigerator_qty} onChange={set('refrigerator_qty')} /></FormField>
-              <FormField label="🟣 Washing Machine"><input type="number" min={0} value={form.washing_machine_qty} onChange={set('washing_machine_qty')} /></FormField>
-              <FormField label="🟡 Microwave Oven"><input type="number" min={0} value={form.microwave_oven_qty} onChange={set('microwave_oven_qty')} /></FormField>
+              <FormField label="Refrigerator"><input type="number" min={0} value={form.refrigerator_qty} onChange={set('refrigerator_qty')} /></FormField>
+              <FormField label="Washing Machine"><input type="number" min={0} value={form.washing_machine_qty} onChange={set('washing_machine_qty')} /></FormField>
+              <FormField label="Microwave Oven"><input type="number" min={0} value={form.microwave_oven_qty} onChange={set('microwave_oven_qty')} /></FormField>
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(55,53,47,0.09)' }}>

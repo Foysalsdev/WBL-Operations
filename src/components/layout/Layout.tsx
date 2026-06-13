@@ -1,19 +1,20 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { Menu, X, ChevronRight, ChevronDown, Plus, MoreHorizontal, Search } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+import { Icon } from '../ui'
 
 const NAV_OPERATIONS = [
-  { to: '/',          label: 'Dashboard',         icon: '🏠' },
-  { to: '/serial',    label: 'Serial Search',      icon: '🔍' },
-  { to: '/inbound',   label: 'Inbound',            icon: '📥' },
-  { to: '/outbound',  label: 'Outbound',           icon: '📤' },
-  { to: '/inventory', label: 'Physical Inventory', icon: '📋' },
-  { to: '/stock',     label: 'Stock Summary',      icon: '📦' },
-  { to: '/reports',   label: 'Reports',            icon: '📊' },
+  { to: '/',          label: 'Dashboard',         icon: 'dashboard' },
+  { to: '/serial',    label: 'Serial Search',      icon: 'search' },
+  { to: '/inbound',   label: 'Inbound',            icon: 'call_received' },
+  { to: '/outbound',  label: 'Outbound',           icon: 'call_made' },
+  { to: '/inventory', label: 'Physical Inventory', icon: 'inventory_2' },
+  { to: '/stock',     label: 'Stock Summary',      icon: 'package_2' },
+  { to: '/reports',   label: 'Reports',            icon: 'bar_chart' },
 ]
 const NAV_MASTER = [
-  { to: '/sku',       label: 'SKU List',  icon: '🗄️' },
-  { to: '/customers', label: 'Customers', icon: '👥' },
+  { to: '/sku',       label: 'SKU List',  icon: 'database' },
+  { to: '/customers', label: 'Customers', icon: 'group' },
 ]
 const ALL = [...NAV_OPERATIONS, ...NAV_MASTER]
 
@@ -35,7 +36,7 @@ function SidebarSection({
         style={{ userSelect: 'none' }}
       >
         <span style={{ width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(55,53,47,0.45)' }}>
-          {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          <Icon name={open ? 'expand_more' : 'chevron_right'} size={14} />
         </span>
         <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(55,53,47,0.45)', letterSpacing: '0.04em', textTransform: 'uppercase', flex: 1 }}>
           {title}
@@ -43,10 +44,10 @@ function SidebarSection({
         <button
           onClick={(e) => { e.stopPropagation() }}
           className="opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.45)', borderRadius: 3 }}
+          style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.45)', borderRadius: 3, display: 'flex' }}
           title="Add page"
         >
-          <Plus size={13} />
+          <Icon name="add" size={14} />
         </button>
       </div>
 
@@ -63,15 +64,17 @@ function SidebarSection({
           `}
           style={{ marginLeft: 4 }}
         >
-          <span style={{ fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0, lineHeight: 1 }}>{icon}</span>
+          <span style={{ width: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Icon name={icon} size={16} />
+          </span>
           <span className="truncate" style={{ flex: 1, fontSize: 14 }}>{label}</span>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
             className="opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.4)', borderRadius: 3, flexShrink: 0 }}
+            style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.4)', borderRadius: 3, flexShrink: 0, display: 'flex' }}
             title="More"
           >
-            <MoreHorizontal size={13} />
+            <Icon name="more_horiz" size={14} />
           </button>
         </NavLink>
       ))}
@@ -119,14 +122,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
             }}>W</div>
             <span className="text-sm font-semibold text-gray-800 truncate">WBL Operations</span>
-            <ChevronDown size={13} className="flex-shrink-0 ml-auto" style={{ color: 'rgba(55,53,47,0.45)' }} />
+            <span className="flex-shrink-0 ml-auto" style={{ color: 'rgba(55,53,47,0.45)', display: 'flex' }}>
+              <Icon name="expand_more" size={16} />
+            </span>
           </div>
         </div>
 
         {/* Search row */}
         <div className="px-3 mb-1">
           <div className="flex items-center gap-2 px-2 py-1 rounded text-sm text-gray-500 hover:bg-black/5 cursor-pointer transition-colors">
-            <Search size={13} style={{ color: 'rgba(55,53,47,0.45)' }} />
+            <span style={{ color: 'rgba(55,53,47,0.45)', display: 'flex' }}>
+              <Icon name="search" size={15} />
+            </span>
             <span style={{ fontSize: 13 }}>Search</span>
           </div>
         </div>
@@ -188,8 +195,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Breadcrumb with page icon */}
           <div className="flex items-center gap-1.5" style={{ fontSize: 13, color: 'rgba(55,53,47,0.55)' }}>
             <span>WBL Operations</span>
-            <ChevronRight size={12} style={{ color: 'rgba(55,53,47,0.30)' }} />
-            <span style={{ fontSize: 14 }}>{current?.icon ?? '🏠'}</span>
+            <Icon name="chevron_right" size={14} style={{ color: 'rgba(55,53,47,0.30)' }} />
+            <Icon name={current?.icon ?? 'dashboard'} size={16} style={{ color: 'rgba(55,53,47,0.65)' }} />
             <span style={{ color: '#37352F', fontWeight: 500 }}>
               {current?.label ?? 'Dashboard'}
             </span>

@@ -304,7 +304,7 @@ function EntryCard({ entry, onEdit }: { entry: EntryHit; onEdit: () => void }) {
         {entry.transport_vendor && <div><div style={{ fontSize:11, color:'rgba(55,53,47,0.4)' }}>Vendor</div><div>{entry.transport_vendor}</div></div>}
         {((entry.refrigerator_qty||0)+(entry.washing_machine_qty||0)+(entry.microwave_oven_qty||0))>0 && (
           <div><div style={{ fontSize:11, color:'rgba(55,53,47,0.4)' }}>Quantities</div><div style={{ fontSize:12 }}>
-            {entry.refrigerator_qty ? `🔵 ${entry.refrigerator_qty} ` : ''}{entry.washing_machine_qty ? `🟣 ${entry.washing_machine_qty} ` : ''}{entry.microwave_oven_qty ? `🟡 ${entry.microwave_oven_qty}` : ''}
+            {entry.refrigerator_qty ? `Fridge: ${entry.refrigerator_qty}  ` : ''}{entry.washing_machine_qty ? `WM: ${entry.washing_machine_qty}  ` : ''}{entry.microwave_oven_qty ? `MWO: ${entry.microwave_oven_qty}` : ''}
           </div></div>
         )}
       </div>
@@ -332,7 +332,7 @@ export default function SerialSearchPage() {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      <PageHeader icon="🔍" title="Serial Search" subtitle="Scan or type any serial — status, history, edit, replace, print" />
+      <PageHeader icon="search" title="Serial Search" subtitle="Scan or type any serial — status, history, edit, replace, print" />
 
       {/* Search bar */}
       <div className="card" style={{ padding:14, marginBottom:20 }}>

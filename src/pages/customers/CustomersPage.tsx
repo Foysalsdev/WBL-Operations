@@ -58,7 +58,7 @@ export default function CustomersPage() {
 
   return (
     <div>
-      <PageHeader icon="👥" title="Customers" subtitle={`${customers?.length||0} parties`}
+      <PageHeader icon="group" title="Customers" subtitle={`${customers?.length||0} parties`}
         actions={<><button onClick={exportCSV} className="btn-secondary"><Download size={13}/>Export</button><button onClick={openNew} className="btn-primary"><Plus size={13}/>Add Customer</button></>}
       />
       <div style={{ marginBottom: 16 }}>
