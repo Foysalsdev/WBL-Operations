@@ -390,7 +390,7 @@ export default function SerialSearchPage() {
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <Clock size={13} style={{ color:'rgba(55,53,47,0.4)' }}/>
             <span style={{ fontSize:12, fontWeight:600, color:'rgba(55,53,47,0.55)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Movement History</span>
-            <span style={{ marginLeft:'auto', fontSize:11, color:'rgba(55,53,47,0.35)' }}>newest first</span>
+            <span style={{ marginLeft:'auto', fontSize:11, color:'rgba(55,53,47,0.55)' }}>newest first</span>
           </div>
 
           {result.entries.map((entry,i) => <EntryCard key={entry.id+i} entry={entry} onEdit={() => setEditEntry(entry)} />)}

@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,fill,GRAD@20,400,0,0&display=block');
+@import '@material-symbols/font-500/outlined.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,16 +11,15 @@
   body {
     background: #F7F7F5;
     color: #37352F;
-    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
-      Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 1.5;
   }
 
-  /* Notion-style inputs */
+  /* Inputs */
   input, select, textarea {
     background: transparent;
-    border: 1px solid rgba(55,53,47,0.16);
+    border: 1px solid rgba(55,53,47,0.2);
     border-radius: 4px;
     padding: 5px 8px;
     font-size: 14px;
@@ -32,98 +30,95 @@
     font-family: inherit;
   }
   input::placeholder, textarea::placeholder {
-    color: rgba(55,53,47,0.40);
+    color: rgba(55,53,47,0.50);
   }
   input:focus, select:focus, textarea:focus {
-    border-color: rgba(35,131,226,0.6);
-    box-shadow: 0 0 0 2px rgba(35,131,226,0.14);
+    border-color: rgba(35,131,226,0.7);
+    box-shadow: 0 0 0 2px rgba(35,131,226,0.15);
   }
 
-  /* Scrollbars — Notion thin style */
+  /* Thin scrollbars */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(55,53,47,0.2); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(55,53,47,0.35); }
+  ::-webkit-scrollbar-thumb { background: rgba(55,53,47,0.18); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(55,53,47,0.30); }
+
+  button { border: none; cursor: pointer; font-family: inherit; }
 }
 
 @layer components {
 
-  /* ── Buttons ───────────────────────── */
+  /* ── Buttons ─────────────────────────────────── */
   .btn {
-    @apply inline-flex items-center gap-1.5 rounded font-medium transition-colors duration-100;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 4px;
+    font-weight: 500;
     font-size: 14px;
     padding: 5px 10px;
     line-height: 1.4;
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
+    transition: background 80ms;
+    border: none;
+    font-family: inherit;
   }
-  .btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+  .btn:disabled { opacity: 0.38; cursor: not-allowed; }
 
-  /* Notion primary = blue fill */
   .btn-primary {
     @apply btn;
     background: #2383E2;
     color: #fff;
   }
   .btn-primary:hover:not(:disabled) { background: #1a73d0; }
-  .btn-primary:active:not(:disabled) { background: #1566be; }
 
-  /* Notion secondary = very subtle gray fill */
   .btn-secondary {
     @apply btn;
-    background: rgba(55,53,47,0.06);
+    background: rgba(55,53,47,0.08);
     color: #37352F;
   }
-  .btn-secondary:hover:not(:disabled) { background: rgba(55,53,47,0.10); }
+  .btn-secondary:hover:not(:disabled) { background: rgba(55,53,47,0.13); }
 
-  /* Ghost — for table row actions */
   .btn-ghost {
     @apply btn;
     background: transparent;
-    color: rgba(55,53,47,0.55);
-    padding: 3px 6px;
+    color: rgba(55,53,47,0.6);
+    padding: 3px 5px;
   }
   .btn-ghost:hover:not(:disabled) {
-    background: rgba(55,53,47,0.06);
+    background: rgba(55,53,47,0.08);
     color: #37352F;
   }
 
-  /* Danger */
-  .btn-danger {
-    @apply btn;
-    background: rgba(224,62,62,0.08);
-    color: #E03E3E;
-  }
-  .btn-danger:hover:not(:disabled) { background: rgba(224,62,62,0.14); }
-
-  /* ── Cards ─────────────────────────── */
+  /* ── Cards ───────────────────────────────────── */
   .card {
     background: #FFFFFF;
     border: 1px solid rgba(55,53,47,0.09);
     border-radius: 6px;
   }
 
-  /* ── Notion Badges / Tags ───────────── */
+  /* ── Tags ────────────────────────────────────── */
   .tag {
-    @apply inline-flex items-center gap-1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 12px;
     font-weight: 500;
-    padding: 1px 6px;
+    padding: 1px 7px;
     border-radius: 3px;
     white-space: nowrap;
+    line-height: 1.6;
   }
-  .tag-blue   { background: #E7F3FB; color: #2383E2; }
-  .tag-green  { background: #DDEDEA; color: #0F7B6C; }
-  .tag-red    { background: #FDDEDE; color: #E03E3E; }
-  .tag-yellow { background: #FBF3DB; color: #DFAB01; }
-  .tag-purple { background: #EAE4F2; color: #6940A5; }
-  .tag-gray   { background: rgba(55,53,47,0.06); color: rgba(55,53,47,0.65); }
+  .tag-blue   { background: #E7F3FB; color: #1d6fa8; }
+  .tag-green  { background: #DDEDEA; color: #0a6b5c; }
+  .tag-red    { background: #FDDEDE; color: #c0392b; }
+  .tag-yellow { background: #FBF3DB; color: #a07800; }
+  .tag-purple { background: #EAE4F2; color: #5b3692; }
+  .tag-gray   { background: rgba(55,53,47,0.07); color: rgba(55,53,47,0.70); }
 
-  /* ── Table ─────────────────────────── */
+  /* ── Table ───────────────────────────────────── */
   .notion-table {
     width: 100%;
     border-collapse: collapse;
@@ -131,56 +126,48 @@
   }
   .notion-table th {
     text-align: left;
-    padding: 6px 12px;
+    padding: 7px 12px;
     font-size: 11px;
     font-weight: 600;
-    color: rgba(55,53,47,0.55);
+    color: rgba(55,53,47,0.60);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     border-bottom: 1px solid rgba(55,53,47,0.09);
     background: #FAFAF9;
     white-space: nowrap;
   }
   .notion-table td {
-    padding: 7px 12px;
+    padding: 8px 12px;
     border-bottom: 1px solid rgba(55,53,47,0.06);
     color: #37352F;
     vertical-align: middle;
   }
-  .notion-table tbody tr:hover td {
-    background: rgba(55,53,47,0.03);
-  }
-  .notion-table tbody tr:last-child td {
-    border-bottom: none;
-  }
+  .notion-table tbody tr:hover td { background: rgba(55,53,47,0.025); }
+  .notion-table tbody tr:last-child td { border-bottom: none; }
 
-  /* ── Notion page header ─────────────── */
-  .page-icon {
-    font-size: 28px;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
+  /* ── Page header ─────────────────────────────── */
   .page-title {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
     color: #37352F;
     line-height: 1.2;
     letter-spacing: -0.02em;
+    margin: 0;
   }
   .page-subtitle {
     font-size: 14px;
-    color: rgba(55,53,47,0.55);
-    margin-top: 2px;
+    color: rgba(55,53,47,0.60);
+    margin-top: 4px;
   }
 
-  /* ── Divider ────────────────────────── */
+  /* ── Divider ─────────────────────────────────── */
   .notion-divider {
     border: none;
     border-top: 1px solid rgba(55,53,47,0.09);
     margin: 0;
   }
 
-  /* ── Stat block (Notion callout style) ─ */
+  /* ── Stat block ──────────────────────────────── */
   .stat-block {
     background: #FAFAF9;
     border: 1px solid rgba(55,53,47,0.09);
@@ -188,77 +175,56 @@
     padding: 16px 20px;
   }
 
-  /* ── Sidebar nav item ───────────────── */
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    color: rgba(55,53,47,0.75);
-    cursor: pointer;
-    transition: background 80ms;
-    user-select: none;
-    min-height: 28px;
-    text-decoration: none;
-  }
-  .nav-item:hover {
-    background: rgba(55,53,47,0.06);
-    color: #37352F;
-  }
-  .nav-item.active {
-    background: rgba(55,53,47,0.08);
-    color: #37352F;
-    font-weight: 500;
-  }
-
-  /* ── Form label ────────────────────── */
+  /* ── Form label ──────────────────────────────── */
   .form-label {
     font-size: 12px;
     font-weight: 500;
-    color: rgba(55,53,47,0.65);
+    color: rgba(55,53,47,0.70);
     margin-bottom: 4px;
     display: block;
   }
 
-  /* ── Notion modal ───────────────────── */
+  /* ── Modal ───────────────────────────────────── */
   .notion-modal {
     background: #FFFFFF;
-    border-radius: 6px;
-    box-shadow: rgba(15,15,15,0.05) 0px 0px 0px 1px,
-                rgba(15,15,15,0.1) 0px 3px 6px,
-                rgba(15,15,15,0.2) 0px 9px 24px;
+    border-radius: 8px;
+    box-shadow:
+      rgba(15,15,15,0.05) 0px 0px 0px 1px,
+      rgba(15,15,15,0.10) 0px 3px 6px,
+      rgba(15,15,15,0.20) 0px 9px 24px;
   }
 
-  /* ── Empty state ────────────────────── */
+  /* ── Empty state ─────────────────────────────── */
   .empty-state {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 48px 24px;
+    padding: 56px 24px;
     text-align: center;
-    color: rgba(55,53,47,0.40);
+    color: rgba(55,53,47,0.45);
     font-size: 14px;
   }
 
-  /* ── Material Symbols icon ──────────── */
+  /* ── Material Symbols ────────────────────────── */
   .msi {
     font-family: 'Material Symbols Outlined';
+    font-size: 18px;
     font-weight: normal;
     font-style: normal;
     line-height: 1;
     letter-spacing: normal;
     text-transform: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
-    word-wrap: normal;
     direction: ltr;
-    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     color: rgba(55,53,47,0.65);
-    vertical-align: middle;
     user-select: none;
+    flex-shrink: 0;
   }
 }

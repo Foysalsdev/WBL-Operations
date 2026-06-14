@@ -158,7 +158,7 @@ export default function PhysicalInventoryPage() {
                   <tbody>
                     {scans?.map((row:any, i:number) => (
                       <tr key={row.id} className="group">
-                        <td style={{ fontSize: 11, color: 'rgba(55,53,47,0.35)', fontFamily: 'monospace' }}>{i+1}</td>
+                        <td style={{ fontSize: 11, color: 'rgba(55,53,47,0.55)', fontFamily: 'monospace' }}>{i+1}</td>
                         <td><span className="tag tag-purple">{row.location}</span></td>
                         <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(55,53,47,0.55)' }}>{row.sku_code||'—'}</td>
                         <td style={{ fontFamily: 'monospace', fontWeight: 500 }}>{row.serial_no}</td>

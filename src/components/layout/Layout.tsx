@@ -36,7 +36,7 @@ function SidebarSection({
         style={{ userSelect: 'none' }}
       >
         <span style={{ width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(55,53,47,0.45)' }}>
-          <Icon name={open ? 'expand_more' : 'chevron_right'} size={14} />
+          <Icon name={open ? 'keyboard_arrow_down' : 'chevron_right'} size={14} />
         </span>
         <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(55,53,47,0.45)', letterSpacing: '0.04em', textTransform: 'uppercase', flex: 1 }}>
           {title}
@@ -123,7 +123,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             }}>W</div>
             <span className="text-sm font-semibold text-gray-800 truncate">WBL Operations</span>
             <span className="flex-shrink-0 ml-auto" style={{ color: 'rgba(55,53,47,0.45)', display: 'flex' }}>
-              <Icon name="expand_more" size={16} />
+              <Icon name="keyboard_arrow_down" size={16} />
             </span>
           </div>
         </div>
@@ -160,8 +160,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Footer */}
         <div className="px-3 py-3" style={{ borderTop: '1px solid rgba(55,53,47,0.09)' }}>
-          <div style={{ fontSize: 11, color: 'rgba(55,53,47,0.40)' }}>Madanpur Warehouse</div>
-          <div style={{ fontSize: 10, color: 'rgba(55,53,47,0.30)', marginTop: 2 }}>v1.0</div>
+          <div style={{ fontSize: 11, color: 'rgba(55,53,47,0.60)' }}>Madanpur Warehouse</div>
+          <div style={{ fontSize: 10, color: 'rgba(55,53,47,0.50)', marginTop: 2 }}>v1.0</div>
         </div>
       </aside>
 
@@ -195,7 +195,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Breadcrumb with page icon */}
           <div className="flex items-center gap-1.5" style={{ fontSize: 13, color: 'rgba(55,53,47,0.55)' }}>
             <span>WBL Operations</span>
-            <Icon name="chevron_right" size={14} style={{ color: 'rgba(55,53,47,0.30)' }} />
+            <Icon name="chevron_right" size={14} style={{ color: 'rgba(55,53,47,0.50)' }} />
             <Icon name={current?.icon ?? 'dashboard'} size={16} style={{ color: 'rgba(55,53,47,0.65)' }} />
             <span style={{ color: '#37352F', fontWeight: 500 }}>
               {current?.label ?? 'Dashboard'}

@@ -145,7 +145,7 @@ export default function ReportsPage() {
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {data.topCustomers.map((c,i) => (
                   <div key={c.name} style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <span style={{ fontSize:11, color:'rgba(55,53,47,0.35)', fontFamily:'monospace', width:16, textAlign:'right' }}>{i+1}</span>
+                    <span style={{ fontSize:11, color:'rgba(55,53,47,0.55)', fontFamily:'monospace', width:16, textAlign:'right' }}>{i+1}</span>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.name}</div>
                       <div style={{ height:3, background:'rgba(55,53,47,0.08)', borderRadius:2, marginTop:3, overflow:'hidden' }}>
@@ -167,7 +167,7 @@ export default function ReportsPage() {
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {data.topVendors.map((v,i) => (
                   <div key={v.name} style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <span style={{ fontSize:11, color:'rgba(55,53,47,0.35)', fontFamily:'monospace', width:16, textAlign:'right' }}>{i+1}</span>
+                    <span style={{ fontSize:11, color:'rgba(55,53,47,0.55)', fontFamily:'monospace', width:16, textAlign:'right' }}>{i+1}</span>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{v.name}</div>
                       <div style={{ height:3, background:'rgba(55,53,47,0.08)', borderRadius:2, marginTop:3, overflow:'hidden' }}>

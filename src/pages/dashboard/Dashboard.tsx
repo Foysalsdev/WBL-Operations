@@ -185,7 +185,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {recent.data?.inbound.length === 0 && (
-                  <tr><td colSpan={3} style={{ textAlign: 'center', color: 'rgba(55,53,47,0.35)', padding: '20px 12px', fontSize: 13 }}>No entries yet</td></tr>
+                  <tr><td colSpan={3} style={{ textAlign: 'center', color: 'rgba(55,53,47,0.55)', padding: '20px 12px', fontSize: 13 }}>No entries yet</td></tr>
                 )}
                 {recent.data?.inbound.map((r: any) => (
                   <tr key={r.id}>
@@ -219,7 +219,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {recent.data?.outbound.length === 0 && (
-                  <tr><td colSpan={3} style={{ textAlign: 'center', color: 'rgba(55,53,47,0.35)', padding: '20px 12px', fontSize: 13 }}>No entries yet</td></tr>
+                  <tr><td colSpan={3} style={{ textAlign: 'center', color: 'rgba(55,53,47,0.55)', padding: '20px 12px', fontSize: 13 }}>No entries yet</td></tr>
                 )}
                 {recent.data?.outbound.map((r: any) => (
                   <tr key={r.id}>

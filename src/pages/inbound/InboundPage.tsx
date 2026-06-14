@@ -144,7 +144,7 @@ export default function InboundPage() {
               <tbody>
                 {entries?.map((row,i) => (
                   <tr key={row.id} className="group">
-                    <td style={{ color: 'rgba(55,53,47,0.35)', fontSize: 11, fontFamily: 'monospace' }}>{i+1}</td>
+                    <td style={{ color: 'rgba(55,53,47,0.55)', fontSize: 11, fontFamily: 'monospace' }}>{i+1}</td>
                     <td style={{ whiteSpace: 'nowrap', fontSize: 12, color: 'rgba(55,53,47,0.65)' }}>{row.receiving_date}</td>
                     <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(55,53,47,0.65)' }}>{row.sap_invoice_no||'—'}</td>
                     <td>

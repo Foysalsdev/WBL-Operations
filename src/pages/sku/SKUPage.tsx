@@ -87,7 +87,7 @@ export default function SKUPage() {
             <tbody>
               {skus.map(row => (
                 <tr key={row.id} className="group">
-                  <td style={{ fontSize: 11, color: 'rgba(55,53,47,0.35)', fontFamily: 'monospace' }}>{row.sl}</td>
+                  <td style={{ fontSize: 11, color: 'rgba(55,53,47,0.55)', fontFamily: 'monospace' }}>{row.sl}</td>
                   <td style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>{row.model_code}</td>
                   <td style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(55,53,47,0.5)' }}>{row.china_code||'—'}</td>
                   <td style={{ fontSize: 13, maxWidth: 300 }}>{row.description}</td>
