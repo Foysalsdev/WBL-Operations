@@ -3,8 +3,10 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { Icon } from '../ui'
 
+// Dashboard is standalone — never inside a section
+const NAV_HOME = { to: '/', label: 'Dashboard', icon: 'dashboard' }
+
 const NAV_OPERATIONS = [
-  { to: '/',          label: 'Dashboard',         icon: 'dashboard' },
   { to: '/serial',    label: 'Serial Search',      icon: 'search' },
   { to: '/inbound',   label: 'Inbound',            icon: 'call_received' },
   { to: '/outbound',  label: 'Outbound',           icon: 'call_made' },
@@ -16,196 +18,255 @@ const NAV_MASTER = [
   { to: '/sku',       label: 'SKU List',  icon: 'database' },
   { to: '/customers', label: 'Customers', icon: 'group' },
 ]
-const ALL = [...NAV_OPERATIONS, ...NAV_MASTER]
+const ALL = [NAV_HOME, ...NAV_OPERATIONS, ...NAV_MASTER]
 
-function SidebarSection({
-  title, items, open, onToggle, onNavigate
+// ── Single nav item — no nested buttons ──────────────────────────
+function NavItem({
+  to, label, icon, end, onClick
+}: { to: string; label: string; icon: string; end?: boolean; onClick: () => void }) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      onClick={onClick}
+      className={({ isActive }) =>
+        [
+          'flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors',
+          isActive
+            ? 'bg-black/8 text-gray-900 font-medium'
+            : 'text-gray-600 hover:bg-black/5 hover:text-gray-900',
+        ].join(' ')
+      }
+      style={{ marginLeft: 4, textDecoration: 'none' }}
+    >
+      <Icon name={icon} size={16} style={{ color: 'rgba(55,53,47,0.55)', flexShrink: 0 }} />
+      <span style={{ flex: 1, fontSize: 14, lineHeight: '22px' }}>{label}</span>
+    </NavLink>
+  )
+}
+
+// ── Collapsible section ──────────────────────────────────────────
+function Section({
+  title,
+  items,
+  open,
+  onToggle,
+  onNavigate,
 }: {
   title: string
-  items: { to: string; label: string; icon: string }[]
+  items: typeof NAV_OPERATIONS
   open: boolean
   onToggle: () => void
   onNavigate: () => void
 }) {
   return (
-    <div className="mb-0.5">
-      {/* Section header — collapsible, hover reveals + button */}
-      <div
-        className="group flex items-center gap-1 px-2 py-1 rounded cursor-pointer hover:bg-black/5"
+    <div style={{ marginBottom: 2 }}>
+      {/* Header — click only to toggle, not to navigate */}
+      <button
         onClick={onToggle}
-        style={{ userSelect: 'none' }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          width: '100%', padding: '4px 8px', borderRadius: 4,
+          background: 'none', border: 'none', cursor: 'pointer',
+          userSelect: 'none',
+        }}
+        className="hover:bg-black/5"
       >
-        <span style={{ width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(55,53,47,0.45)' }}>
-          <Icon name={open ? 'keyboard_arrow_down' : 'chevron_right'} size={14} />
-        </span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(55,53,47,0.45)', letterSpacing: '0.04em', textTransform: 'uppercase', flex: 1 }}>
+        <Icon
+          name={open ? 'keyboard_arrow_down' : 'chevron_right'}
+          size={14}
+          style={{ color: 'rgba(55,53,47,0.45)', flexShrink: 0 }}
+        />
+        <span style={{
+          fontSize: 11, fontWeight: 600,
+          color: 'rgba(55,53,47,0.50)',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          flex: 1,
+          textAlign: 'left',
+        }}>
           {title}
         </span>
-        <button
-          onClick={(e) => { e.stopPropagation() }}
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.45)', borderRadius: 3, display: 'flex' }}
-          title="Add page"
-        >
-          <Icon name="add" size={14} />
-        </button>
-      </div>
+      </button>
 
-      {/* Items */}
-      {open && items.map(({ to, label, icon }) => (
-        <NavLink
-          key={to}
-          to={to}
-          end={to === '/'}
-          onClick={onNavigate}
-          className={({ isActive }) => `
-            group flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors
-            ${isActive ? 'bg-gray-200/80 text-gray-900 font-medium' : 'text-gray-700 hover:bg-gray-100'}
-          `}
-          style={{ marginLeft: 4 }}
-        >
-          <span style={{ width: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Icon name={icon} size={16} />
-          </span>
-          <span className="truncate" style={{ flex: 1, fontSize: 14 }}>{label}</span>
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', color: 'rgba(55,53,47,0.4)', borderRadius: 3, flexShrink: 0, display: 'flex' }}
-            title="More"
-          >
-            <Icon name="more_horiz" size={14} />
-          </button>
-        </NavLink>
-      ))}
+      {open && (
+        <div style={{ paddingTop: 2 }}>
+          {items.map(item => (
+            <NavItem
+              key={item.to}
+              to={item.to}
+              label={item.label}
+              icon={item.icon}
+              onClick={onNavigate}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
+// ── Layout ───────────────────────────────────────────────────────
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [opsOpen, setOpsOpen] = useState(true)
   const [masterOpen, setMasterOpen] = useState(true)
   const location = useLocation()
   const current = ALL.find(n => n.to === location.pathname)
+  const closeMobile = () => setMobileOpen(false)
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#F7F7F5' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#F7F7F5' }}>
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-20 lg:hidden"
-          style={{ background: 'rgba(0,0,0,0.3)' }}
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobile}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 20,
+            background: 'rgba(0,0,0,0.3)',
+          }}
+          className="lg:hidden"
         />
       )}
 
-      {/* ── Sidebar ──────────────────────────────────── */}
-      <aside className={`
-        fixed top-0 left-0 h-full z-30 flex flex-col
-        transition-transform duration-200 lg:static lg:translate-x-0
-        ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}
+      {/* ── Sidebar ────────────────────────────────────── */}
+      <aside
         style={{
           width: 240,
           background: '#F7F7F5',
           borderRight: '1px solid rgba(55,53,47,0.09)',
+          display: 'flex',
+          flexDirection: 'column',
+          flexShrink: 0,
+          height: '100%',
+          zIndex: 30,
         }}
+        className={`
+          fixed top-0 left-0
+          transition-transform duration-200
+          lg:static lg:translate-x-0
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
       >
-        {/* Workspace header */}
-        <div className="flex items-center gap-2 px-3 py-3" style={{ minHeight: 48 }}>
-          <div className="flex items-center gap-2 flex-1 min-w-0 px-1.5 py-1 rounded cursor-pointer hover:bg-black/5 transition-colors">
-            <div style={{
-              width: 20, height: 20, borderRadius: 4, background: '#37352F',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
-            }}>W</div>
-            <span className="text-sm font-semibold text-gray-800 truncate">WBL Operations</span>
-            <span className="flex-shrink-0 ml-auto" style={{ color: 'rgba(55,53,47,0.45)', display: 'flex' }}>
-              <Icon name="keyboard_arrow_down" size={16} />
-            </span>
-          </div>
-        </div>
 
-        {/* Search row */}
-        <div className="px-3 mb-1">
-          <div className="flex items-center gap-2 px-2 py-1 rounded text-sm text-gray-500 hover:bg-black/5 cursor-pointer transition-colors">
-            <span style={{ color: 'rgba(55,53,47,0.45)', display: 'flex' }}>
-              <Icon name="search" size={15} />
+        {/* Workspace header */}
+        <div style={{
+          display: 'flex', alignItems: 'center',
+          padding: '0 12px', height: 48, flexShrink: 0,
+          borderBottom: '1px solid rgba(55,53,47,0.07)',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            flex: 1, minWidth: 0,
+            padding: '4px 6px', borderRadius: 4,
+            cursor: 'pointer',
+          }}
+            className="hover:bg-black/5"
+          >
+            <div style={{
+              width: 20, height: 20, borderRadius: 4,
+              background: '#37352F', flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11, fontWeight: 700, color: '#fff',
+            }}>W</div>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#37352F', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              WBL Operations
             </span>
-            <span style={{ fontSize: 13 }}>Search</span>
+            <Icon name="keyboard_arrow_down" size={16} style={{ color: 'rgba(55,53,47,0.45)', flexShrink: 0 }} />
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-2 py-1">
-          <SidebarSection
+        <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 8px' }}>
+
+          {/* Dashboard — standalone home item */}
+          <NavItem
+            to={NAV_HOME.to}
+            label={NAV_HOME.label}
+            icon={NAV_HOME.icon}
+            end
+            onClick={closeMobile}
+          />
+
+          <div style={{ height: 12 }} />
+
+          {/* Operations section */}
+          <Section
             title="Operations"
             items={NAV_OPERATIONS}
             open={opsOpen}
             onToggle={() => setOpsOpen(o => !o)}
-            onNavigate={() => setMobileOpen(false)}
+            onNavigate={closeMobile}
           />
-          <div className="mt-2">
-            <SidebarSection
-              title="Master Data"
-              items={NAV_MASTER}
-              open={masterOpen}
-              onToggle={() => setMasterOpen(o => !o)}
-              onNavigate={() => setMobileOpen(false)}
-            />
-          </div>
+
+          <div style={{ height: 8 }} />
+
+          {/* Master Data section */}
+          <Section
+            title="Master Data"
+            items={NAV_MASTER}
+            open={masterOpen}
+            onToggle={() => setMasterOpen(o => !o)}
+            onNavigate={closeMobile}
+          />
         </nav>
 
         {/* Footer */}
-        <div className="px-3 py-3" style={{ borderTop: '1px solid rgba(55,53,47,0.09)' }}>
-          <div style={{ fontSize: 11, color: 'rgba(55,53,47,0.60)' }}>Madanpur Warehouse</div>
-          <div style={{ fontSize: 10, color: 'rgba(55,53,47,0.50)', marginTop: 2 }}>v1.0</div>
+        <div style={{
+          padding: '10px 12px',
+          borderTop: '1px solid rgba(55,53,47,0.09)',
+          flexShrink: 0,
+        }}>
+          <div style={{ fontSize: 11, color: 'rgba(55,53,47,0.55)' }}>Madanpur Warehouse</div>
+          <div style={{ fontSize: 10, color: 'rgba(55,53,47,0.45)', marginTop: 2 }}>v1.0</div>
         </div>
       </aside>
 
-      {/* ── Main content ──────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* ── Main ───────────────────────────────────────── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
         {/* Top bar */}
-        <header className="flex items-center gap-2 px-4 lg:px-8"
-          style={{
-            height: 48,
-            borderBottom: '1px solid rgba(55,53,47,0.09)',
-            background: '#FFFFFF',
-            flexShrink: 0,
-          }}
-        >
+        <header style={{
+          height: 48, flexShrink: 0,
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '0 24px',
+          borderBottom: '1px solid rgba(55,53,47,0.09)',
+          background: '#FFFFFF',
+        }}>
+
+          {/* Mobile menu button */}
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => setMobileOpen(v => !v)}
             className="lg:hidden"
             style={{
-              background: 'rgba(55,53,47,0.06)',
-              border: 'none',
-              borderRadius: 4,
-              padding: '4px 6px',
-              cursor: 'pointer',
-              color: 'rgba(55,53,47,0.65)',
+              background: 'rgba(55,53,47,0.06)', border: 'none',
+              borderRadius: 4, padding: '4px 6px',
+              cursor: 'pointer', color: 'rgba(55,53,47,0.65)',
+              display: 'flex', alignItems: 'center',
             }}
           >
             {mobileOpen ? <X size={16} /> : <Menu size={16} />}
           </button>
 
-          {/* Breadcrumb with page icon */}
-          <div className="flex items-center gap-1.5" style={{ fontSize: 13, color: 'rgba(55,53,47,0.55)' }}>
-            <span>WBL Operations</span>
-            <Icon name="chevron_right" size={14} style={{ color: 'rgba(55,53,47,0.50)' }} />
-            <Icon name={current?.icon ?? 'dashboard'} size={16} style={{ color: 'rgba(55,53,47,0.65)' }} />
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+            <span style={{ color: 'rgba(55,53,47,0.50)' }}>WBL Operations</span>
+            <Icon name="chevron_right" size={14} style={{ color: 'rgba(55,53,47,0.35)' }} />
+            <Icon
+              name={current?.icon ?? 'dashboard'}
+              size={15}
+              style={{ color: 'rgba(55,53,47,0.60)' }}
+            />
             <span style={{ color: '#37352F', fontWeight: 500 }}>
               {current?.label ?? 'Dashboard'}
             </span>
           </div>
         </header>
 
-        {/* Page */}
-        <main className="flex-1 overflow-y-auto" style={{ background: '#FFFFFF' }}>
-          <div className="max-w-5xl mx-auto px-6 lg:px-14 py-10">
+        {/* Page content */}
+        <main style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
+          <div style={{ maxWidth: 960, margin: '0 auto', padding: '48px 56px' }}>
             {children}
           </div>
         </main>

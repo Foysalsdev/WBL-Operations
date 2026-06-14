@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { StatCard, LoadingSpinner, PageHeader } from '../../components/ui'
+import { StatCard, LoadingSpinner, PageHeader, Icon } from '../../components/ui'
 import { format } from 'date-fns'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
@@ -95,6 +97,16 @@ export default function Dashboard() {
   const stats  = useStats()
   const chart  = useChart()
   const recent = useRecent()
+  const navigate = useNavigate()
+  const [searchValue, setSearchValue] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const v = searchValue.trim()
+    if (v) {
+      navigate(`/serial?q=${encodeURIComponent(v)}`)
+    }
+  }
 
   if (stats.isLoading) return <LoadingSpinner />
   const s = stats.data!
@@ -106,6 +118,65 @@ export default function Dashboard() {
         title="Dashboard"
         subtitle={`${format(new Date(), 'EEEE, d MMMM yyyy')} · Madanpur Warehouse`}
       />
+
+      {/* ── Global Serial Search bar ── */}
+      <form onSubmit={handleSearch} style={{ marginBottom: 32 }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
+          border: '1px solid rgba(55,53,47,0.20)',
+          borderRadius: 6,
+          overflow: 'hidden',
+          background: '#fff',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        }}>
+          <span style={{ padding: '0 12px', display: 'flex', alignItems: 'center', color: 'rgba(55,53,47,0.45)' }}>
+            <Icon name="search" size={18} />
+          </span>
+          <input
+            type="text"
+            value={searchValue}
+            onChange={e => setSearchValue(e.target.value)}
+            placeholder="Search serial number — scan or type and press Enter"
+            autoComplete="off"
+            spellCheck={false}
+            style={{
+              flex: 1,
+              border: 'none',
+              borderRadius: 0,
+              padding: '10px 0',
+              fontSize: 15,
+              fontFamily: 'monospace',
+              color: '#37352F',
+              background: 'transparent',
+              outline: 'none',
+              boxShadow: 'none',
+            }}
+          />
+          <button
+            type="submit"
+            style={{
+              padding: '0 16px',
+              height: '100%',
+              minHeight: 42,
+              background: '#37352F',
+              color: '#fff',
+              border: 'none',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              flexShrink: 0,
+            }}
+          >
+            <Icon name="search" size={15} style={{ color: '#fff' }} />
+            Search
+          </button>
+        </div>
+      </form>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">

@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { LoadingSpinner, Modal, FormField, PageHeader, Tag } from '../../components/ui'
 import {
@@ -315,10 +316,17 @@ function EntryCard({ entry, onEdit }: { entry: EntryHit; onEdit: () => void }) {
 
 // ── Main Page ────────────────────────────────────────────────────────────
 export default function SerialSearchPage() {
-  const [inputValue, setInputValue] = useState('')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchParams] = useSearchParams()
+  const initialQ = searchParams.get('q') || ''
+  const [inputValue, setInputValue] = useState(initialQ)
+  const [searchTerm, setSearchTerm] = useState(initialQ)
   const [editEntry, setEditEntry] = useState<EntryHit|null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-search if navigated with ?q= from dashboard
+  useEffect(() => {
+    if (initialQ) setSearchTerm(initialQ)
+  }, [initialQ])
 
   const { data: result, isFetching } = useQuery({
     queryKey: ['serial-search', searchTerm],
