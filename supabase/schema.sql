@@ -254,3 +254,136 @@ CREATE INDEX IF NOT EXISTS idx_audit_action ON serial_audit_log(action);
 
 ALTER TABLE serial_audit_log ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all for authenticated" ON serial_audit_log FOR ALL USING (true);
+
+-- =====================================================
+-- 8. PURCHASE REQUISITION (PR) — Internal
+-- =====================================================
+CREATE TABLE IF NOT EXISTS purchase_requisitions (
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  pr_number             TEXT UNIQUE NOT NULL,
+  supplier_name         TEXT,
+  supplier_code         INT,
+  pr_date               DATE NOT NULL DEFAULT CURRENT_DATE,
+  expected_delivery_date DATE,
+  status                TEXT NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft','approved','partially_received','fully_received','closed')),
+  approved_by           TEXT,
+  delivery_terms        TEXT,
+  total_value           NUMERIC(14,2) DEFAULT 0,
+  remarks               TEXT,
+  auto_created          BOOLEAN DEFAULT FALSE,
+  created_at            TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS purchase_requisition_items (
+  id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  pr_id            UUID NOT NULL REFERENCES purchase_requisitions(id) ON DELETE CASCADE,
+  sku_code         INT,
+  sku_description  TEXT,
+  ordered_qty      INT NOT NULL DEFAULT 0,
+  unit_price       NUMERIC(10,2) DEFAULT 0,
+  received_qty     INT DEFAULT 0,
+  created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_pr_status     ON purchase_requisitions(status);
+CREATE INDEX IF NOT EXISTS idx_pr_items_pr   ON purchase_requisition_items(pr_id);
+CREATE INDEX IF NOT EXISTS idx_pr_items_sku  ON purchase_requisition_items(sku_code);
+
+ALTER TABLE purchase_requisitions      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE purchase_requisition_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON purchase_requisitions      FOR ALL USING (true);
+CREATE POLICY "Allow all" ON purchase_requisition_items FOR ALL USING (true);
+
+-- =====================================================
+-- 9. GRN — Goods Receipt Note
+-- =====================================================
+CREATE TABLE IF NOT EXISTS grn_entries (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  grn_sap_ref   TEXT,
+  pr_id         UUID REFERENCES purchase_requisitions(id),
+  receive_date  DATE NOT NULL DEFAULT CURRENT_DATE,
+  supplier_name TEXT,
+  remarks       TEXT,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS grn_items (
+  id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  grn_id           UUID NOT NULL REFERENCES grn_entries(id) ON DELETE CASCADE,
+  sku_code         INT,
+  sku_description  TEXT,
+  ordered_qty      INT DEFAULT 0,
+  received_qty     INT NOT NULL DEFAULT 0,
+  damaged_qty      INT DEFAULT 0,
+  shortage_qty     INT DEFAULT 0,
+  created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS grn_serials (
+  id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  grn_id     UUID NOT NULL REFERENCES grn_entries(id) ON DELETE CASCADE,
+  serial_no  TEXT NOT NULL,
+  sku_code   TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_grn_pr       ON grn_entries(pr_id);
+CREATE INDEX IF NOT EXISTS idx_grn_items    ON grn_items(grn_id);
+CREATE INDEX IF NOT EXISTS idx_grn_serials  ON grn_serials(grn_id);
+
+ALTER TABLE grn_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE grn_items   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE grn_serials ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON grn_entries FOR ALL USING (true);
+CREATE POLICY "Allow all" ON grn_items   FOR ALL USING (true);
+CREATE POLICY "Allow all" ON grn_serials FOR ALL USING (true);
+
+-- =====================================================
+-- 10. PRN — Purchase Return Note
+-- =====================================================
+CREATE TABLE IF NOT EXISTS prn_entries (
+  id             UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  prn_sap_ref    TEXT,
+  grn_id         UUID REFERENCES grn_entries(id),
+  pr_id          UUID REFERENCES purchase_requisitions(id),
+  return_date    DATE NOT NULL DEFAULT CURRENT_DATE,
+  return_reason  TEXT,
+  supplier_name  TEXT,
+  remarks        TEXT,
+  created_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS prn_items (
+  id               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  prn_id           UUID NOT NULL REFERENCES prn_entries(id) ON DELETE CASCADE,
+  sku_code         INT,
+  sku_description  TEXT,
+  received_qty     INT DEFAULT 0,
+  return_qty       INT NOT NULL DEFAULT 0,
+  created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS prn_serials (
+  id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  prn_id     UUID NOT NULL REFERENCES prn_entries(id) ON DELETE CASCADE,
+  serial_no  TEXT NOT NULL,
+  sku_code   TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_prn_grn     ON prn_entries(grn_id);
+CREATE INDEX IF NOT EXISTS idx_prn_items   ON prn_items(prn_id);
+CREATE INDEX IF NOT EXISTS idx_prn_serials ON prn_serials(prn_id);
+
+ALTER TABLE prn_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prn_items   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prn_serials ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON prn_entries FOR ALL USING (true);
+CREATE POLICY "Allow all" ON prn_items   FOR ALL USING (true);
+CREATE POLICY "Allow all" ON prn_serials FOR ALL USING (true);
+
+-- =====================================================
+-- Add min_stock_level to skus
+-- =====================================================
+ALTER TABLE skus ADD COLUMN IF NOT EXISTS min_stock_level INT DEFAULT 0;
